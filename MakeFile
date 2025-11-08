@@ -1,0 +1,15 @@
+lab1:
+	g++ lab1.cpp -o lab1
+	./lab1.exe
+lab2:
+	g++ lab2.cpp -o lab2
+	./lab2.exe
+lab3:
+	g++ lab3.cpp -o lab3
+	./lab3.exe
+lab4:
+	g++ lab4.cpp -o lab4
+	./lab4.exe
+lab5:
+	g++ lab5.cpp -o lab5
+	./lab5.exe
