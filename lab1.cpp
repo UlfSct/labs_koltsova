@@ -58,20 +58,20 @@ double norm(const std::vector<std::vector<double>>& a, const std::vector<std::ve
 
 void printMatrix(std::vector<std::vector<double>> f, int dt_steps, int dx_steps, std::ofstream& out)
 {
-    out << std::setw(10) << "t\\x";
+    out << std::setw(20) << "x\\y";
 
     for (int j = 0; j < dx_steps; j++)
     {
-        out << std::setw(10) << std::fixed << std::setprecision(5) << (X_MAX - X_MIN) / double(dx_steps - 1) * j;
+        out << std::setw(20) << std::fixed << std::setprecision(5) << (X_MAX - X_MIN) / double(dx_steps - 1) * j;
     }
     out << "\n";
 
     for (int n = dt_steps - 1; n >= 0; n--)
     {
-        out << std::setw(10) << std::fixed << std::setprecision(5) << (T_MAX - T_MIN) / double(dt_steps - 1) * n;
+        out << std::setw(20) << std::fixed << std::setprecision(5) << (T_MAX - T_MIN) / double(dt_steps - 1) * n;
         for (int j = 0; j < dx_steps; j++)
         {
-            out << std::setw(10) << std::fixed << std::setprecision(5) << f[n][j];
+            out << std::setw(20) << std::fixed << std::setprecision(5) << f[n][j];
         }
         out << "\n";
     }
@@ -86,7 +86,7 @@ void calculateEquasionImplicit(int dt_steps, int dx_steps, int dy_steps)
 
     std::vector<std::vector<std::vector<double>>> ksi;
     std::vector<std::vector<std::vector<double>>> psi;
-    psi.push_back(*new std::vector<std::vector<double>>(dx_steps, std::vector<double>(dy_steps, 2)));
+    psi.push_back(*new std::vector<std::vector<double>>(dx_steps, std::vector<double>(dy_steps, 1)));
     ksi.push_back(*new std::vector<std::vector<double>>(dx_steps, std::vector<double>(dy_steps, ksi_0)));
 
     // внешний цикл по t
@@ -123,23 +123,28 @@ void calculateEquasionImplicit(int dt_steps, int dx_steps, int dy_steps)
                 double v_y = (psi[n][j][k] - psi[n][j - 1][k]) / dx;
                 ksi[n + 1][j][k] = (ksi_1_2[j][k] / dt - v_y / dy * ksi[n + 1][j][k + 1]) / (1 / dt - v_y / dx);
             }
-        }  
-
-        std::cout << ksi[n + 1][2][2] << " " << n << " \n";
+        }
         
-        std::vector<std::vector<double>> psi_0 = psi[n];
+        std::vector<std::vector<double>> psi_0(dx_steps, std::vector<double>(dy_steps, -999));
         std::vector<std::vector<double>> psi_1_2(dx_steps, std::vector<double>(dy_steps, -9999));
         std::vector<std::vector<double>> psi_1(dx_steps, std::vector<double>(dy_steps, -9999));
 
+        int m = 0;
         while (norm(psi_0, psi_1) > E)
         {
-            if (psi_1[0][0] != -9999) {
-                for (int j = 0; j < dx_steps; j++)
+            for (int j = 0; j < dx_steps; j++)
+            {
+                for (int k = 0; k < dy_steps; k++)
                 {
-                    for (int k = 0; k < dy_steps; k++)
+                    if (m == 0)
+                    {
+                        psi_0[j][k] = psi[n][j][k];
+                    }
+                    else
                     {
                         psi_0[j][k] = psi_1[j][k];
                     }
+                    
                 }
             }
 
@@ -188,18 +193,17 @@ void calculateEquasionImplicit(int dt_steps, int dx_steps, int dy_steps)
                     double b_j = - (2 * dt + pow(dy, 2));
                     double c_j = dt;
                     double e_j = - pow(dy, 2) * psi_1_2[j][k];
-                    a[j] = -a_j / (b_j + c_j * a[j - 1]);
-                    b[j] = (e_j - c_j * b[j - 1]) / (b_j + c_j * a[j - 1]);
+                    a[k] = -a_j / (b_j + c_j * a[k - 1]);
+                    b[k] = (e_j - c_j * b[k - 1]) / (b_j + c_j * a[k - 1]);
                 }
                 psi_1[j][dy_steps - 1] = psi_y_N(j * dx);
             
-
-
                 for (int k = dy_steps - 2; k >= 0; k--)
                 {
-                    psi_1[j][k] = a[j] * psi_1_2[j][k + 1] + b[j];
+                    psi_1[j][k] = a[k] * psi_1[j][k + 1] + b[k];
                 }
             }
+            m++;
         }
 
         psi.push_back(*new std::vector<std::vector<double>>(dx_steps, std::vector<double>(dy_steps, -9999)));
@@ -213,6 +217,47 @@ void calculateEquasionImplicit(int dt_steps, int dx_steps, int dy_steps)
         n++;
     }
 
+    std::vector<std::vector<std::vector<double>>> v_x;
+    std::vector<std::vector<std::vector<double>>> v_y;
+    n = 0;
+    while (n < dt_steps)
+    {
+        std::vector<std::vector<double>> matrix_x;
+        std::vector<std::vector<double>> matrix_y;
+        for (int j = 0; j < dx_steps; j++)
+        {
+            std::vector<double> row_x;
+            std::vector<double> row_y;
+            for (int k = 0; k < dy_steps; k++)
+            {
+                if (j == 0)
+                {
+                    row_y.push_back((psi[n][j + 1][k] - psi[n][j][k]) / dx);
+                }
+                else
+                {
+                    row_y.push_back((psi[n][j][k] - psi[n][j - 1][k]) / dx);
+                }
+
+                if (k == dy_steps - 1)
+                {
+                    row_x.push_back((psi[n][j][k] - psi[n][j][k - 1]) / dy);
+                }
+                else
+                {
+                    row_x.push_back((psi[n][j][k + 1] - psi[n][j][k]) / dy);
+                }
+                
+                
+            }
+            matrix_x.push_back(row_x);
+            matrix_y.push_back(row_y);
+        }
+        v_x.push_back(matrix_x);
+        v_y.push_back(matrix_y);
+        n++;
+    }
+
     std::ofstream out;
     n = 0;
     while (n < dt_steps)
@@ -221,6 +266,10 @@ void calculateEquasionImplicit(int dt_steps, int dx_steps, int dy_steps)
         printMatrix(ksi[n], dx_steps, dy_steps, out);
         out.open(OUTPUT_DIR + "psi_n_" + std::to_string(n) + ".txt"); 
         printMatrix(psi[n], dx_steps, dy_steps, out);
+        out.open(OUTPUT_DIR + "vx_n_" + std::to_string(n) + ".txt"); 
+        printMatrix(v_x[n], dx_steps, dy_steps, out);
+        out.open(OUTPUT_DIR + "vy_n_" + std::to_string(n) + ".txt"); 
+        printMatrix(v_y[n], dx_steps, dy_steps, out);
         n++;
     }
     

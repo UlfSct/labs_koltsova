@@ -3,5 +3,4 @@
 *.json
 *.xml
 **/results/
-**/output/
-**/data/
+*.exe

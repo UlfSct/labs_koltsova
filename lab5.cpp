@@ -8,8 +8,8 @@
 #define M_PI 3.14159265358979323846
 
 const std::string OUTPUT_DIR = "./results/lab5/";
-const std::vector<int> DT_STEPS = { 101 };
-const std::vector<int> DX_STEPS = { 11 };
+const std::vector<int> DT_STEPS = { 1001 };
+const std::vector<int> DX_STEPS = { 101 };
 
 const double X_MIN = 0.0;
 const double X_MAX = 1.0;
