@@ -13,3 +13,6 @@ lab4:
 lab5:
 	g++ lab5.cpp -o lab5
 	./lab5.exe
+lab10:
+	g++ lab10.cpp -o lab10
+	./lab10.exe
