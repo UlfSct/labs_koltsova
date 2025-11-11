@@ -2,8 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import sys
 
-data = pd.read_csv("./simulation_data_9_100.000000_0_0.900000.csv")
-L = 100
+data = pd.read_csv("./simulation_data_20_300.000000_0_0.300000.csv")
+L = 400
 
 plt.figure(figsize=(10, 4))
 plt.plot(data['time'], data['co_ad_count'], label='co_ad_count')

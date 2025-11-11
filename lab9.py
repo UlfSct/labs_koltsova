@@ -112,7 +112,6 @@ def main():
     Q = 0.1
     T_total = 100.0
 
-    # Инициализация решетки
     lattice = np.zeros((X, Y), dtype=int)
     positions = random.sample([(i, j) for i in range(X) for j in range(Y)], N_A)
     for i, j in positions:
@@ -122,7 +121,6 @@ def main():
     step_count = 0
     history = []
 
-    # Симуляция
     output_interval = T_total / 10
     next_output_time = output_interval
     print(f"[N = 0]: t = {time:.4f}")
